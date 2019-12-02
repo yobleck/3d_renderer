@@ -6,6 +6,8 @@
 #include <ctime>
 #include <chrono> //for measuring code speed
 #include <cmath> //sin cos etc.
+#include <ncurses.h> //for screen rendering stuff
+#include <unistd.h> //for sleeping
 using namespace std;
 
 int main(){//auto start = chrono::high_resolution_clock::now();
@@ -13,9 +15,11 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     int player_pos[3] = {50, 50, 50}; //={500,500,500} //store player position in 3d space
     const double pi = 3.14159265358979323846; //defines pi duh
     double cam_angle[2] = {pi/2, 0}; //={0,0} //store the vertical and horizontal camera angle
-    const double res[2] = {200, 113}; //={1920,1080} //horizontal then vertical resolution
+    const double res[2] = {72, 40}; //={1920,1080} //horizontal then vertical resolution
     const int render_dist = 65;
     const double fov[2] = {pi/2, (5*pi)/12}; //={90,75} //horizontal then vertical field of view
+    
+    //TODO:replace this with read from vmf file and k-d tree and stuff
     int map[100][100][100]; //map data with each x,y,z point holding color info
     //populates cubic map with walls of different colors/numbers
     for(int x=0;x<100;x++){
@@ -56,6 +60,21 @@ int main(){//auto start = chrono::high_resolution_clock::now();
         }//cout << endl;
     }
     //////////////////////////////////////////end of initialization
+    
+    
+    int input;
+    int temp_loop =0;
+    initscr(); //start curses
+    noecho();
+    WINDOW *win = newwin(0,0,0,0); //creates window    TODO:might want to uses this to set to res
+    nodelay(win,TRUE); //makes wgetch non blocking
+    while(temp_loop<100){
+        temp_loop++;
+        input = wgetch(win); //w=119 a=97 s=115 d=100 i=105 j=106 k=107 l=108 p=112
+        if(input==112){break;}
+        //TODO:insert code to handle user inputs here
+    
+    
     auto start = chrono::high_resolution_clock::now();
     double temp_x=0, temp_y=0, temp_z=0;
     int frame_hor=0, frame_vert=0;
@@ -96,7 +115,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     for(int x=0;x<res[1];x++){
         for(int y=0;y<res[0];y++){
             if(framebuffer[x][y]==0){
-               cout << "\033[30m■\033[0m"; //unicode square character as pixel with ascii color encoding
+               cout << "\033[30m■\033[0m"; //unicode square character as pixel with ascii color encoding   see above for color coding
             }
             else if(framebuffer[x][y]==1){
                 cout << "\033[31m■\033[0m";
@@ -126,7 +145,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
                cout << "\033[35m■\033[0m"; 
             }
             //cout << framebuffer[x][y];
-        }cout << endl;
+        }cout << endl<<"\r";
     }
     
     
@@ -136,9 +155,16 @@ int main(){//auto start = chrono::high_resolution_clock::now();
         //check for user input to break out of loop and end program cleanly
     auto stop = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = stop - start;
-    cout << "time: " << elapsed.count() <<endl;
-    //system("clear"); //stoopid ass way to clear screen
-    cout << "\ntest" << endl;
+    cout << "time: " << elapsed.count() <<endl<<"\r";
+    
+
+        usleep(100000); //pauses loop so output can be seen on screen   TODO:refine to cause less flickering
+        wclear(win); //clear screen for next loop
+    }
+    endwin();
+    
+    
+    //cout << "\ntest" << endl;
     return 0;
 }
 
@@ -146,9 +172,9 @@ int main(){//auto start = chrono::high_resolution_clock::now();
 
 //not needed?
 //this function is what sends out rays, takes 2 angles as inputs and returns hex rgb values(#FFFFFF)
-int ray_caster(){
-    return 0x000000;
-}//optional ray splitting for distant objects average rgb values of the 2 sub rays
+//int ray_caster(){
+    //return 0x000000;
+//}//optional ray splitting for distant objects average rgb values of the 2 sub rays
 
 
 /*worry about this later. easier to just generate map in c++ for now
