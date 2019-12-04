@@ -1,4 +1,4 @@
-//g++ -o 3dexe 3d.cpp     -lncurses see usr_input.cpp
+//g++ -lncurses -o 3dexe 3d.cpp     -lncurses see usr_input.cpp
 #include <iostream>
 //#include <fstream> //file reading
 #include <cstdlib>
@@ -8,10 +8,12 @@
 #include <cmath> //sin cos etc.
 #include <ncurses.h> //for screen rendering stuff
 #include <unistd.h> //for sleeping
+#include <locale.h> //for proper printw of suare character
 using namespace std;
 
 int main(){//auto start = chrono::high_resolution_clock::now();
     //declare and initialize variables
+    setlocale(LC_ALL,""); //for proper wprintw of square character
     int player_pos[3] = {50, 50, 50}; //={500,500,500} //store player position in 3d space
     const double pi = 3.14159265358979323846; //defines pi duh
     double cam_angle[2] = {pi/2, 0}; //={0,0} //store the vertical and horizontal camera angle
@@ -66,18 +68,32 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     int temp_loop =0;
     initscr(); //start curses
     noecho();
+    //curs_set(0) //makes cursor invisible
+    refresh();
     WINDOW *win = newwin(0,0,0,0); //creates window    TODO:might want to uses this to set to res
     nodelay(win,TRUE); //makes wgetch non blocking
-    while(temp_loop<100){
+    
+    while(temp_loop<20){ //MAIN LOOP
         temp_loop++;
         input = wgetch(win); //w=119 a=97 s=115 d=100 i=105 j=106 k=107 l=108 p=112
-        if(input==112){break;}
         //TODO:insert code to handle user inputs here
+        if(input==112){break;} //check for user input to break out of loop and end program cleanly
+        else if(input==119){player_pos[0]++;}
+        else if(input==97){}
+        else if(input==115){player_pos[0]--;}
+        else if(input==100){}
+        else if(input==105){}
+        else if(input==106){}
+        else if(input==107){}
+        else if(input==108){}
+        
+        player_pos[1]++; //for testing
     
-    
+    //actual rendering calculations done here
     auto start = chrono::high_resolution_clock::now();
     double temp_x=0, temp_y=0, temp_z=0;
     int frame_hor=0, frame_vert=0;
+    //double for loop runs through screen resolution pixel by pixel
     for(double theta = cam_angle[0]-(fov[0]/2); theta <= cam_angle[0]+(fov[0]/2); theta += fov[0]/res[0]){ //horizontal
         for(double phi = cam_angle[1]-(fov[1]/2); phi <= cam_angle[1]+(fov[1]/2); phi+= fov[1]/res[1]){ //vertical
             //cout << theta << " " << phi << endl;
@@ -111,55 +127,69 @@ int main(){//auto start = chrono::high_resolution_clock::now();
         frame_vert++; frame_hor=0;
     }
     
-    //print frame buffer
+        //clear previous frame before drawing new one
+        //wclear(win);
+        //werase(win);
+        //wmove(win,0,0);
+        //wrefresh(win);    //why doesn't this work TODO:draw entire frame to buffer then refresh to draw all at once
+    
+    //print frame buffer to cmd with "\u25A0" black geometric square character
     for(int x=0;x<res[1];x++){
         for(int y=0;y<res[0];y++){
             if(framebuffer[x][y]==0){
-               cout << "\033[30m■\033[0m"; //unicode square character as pixel with ascii color encoding   see above for color coding
+               //cout << "\033[30m■\033[0m"; //unicode square character as pixel with ascii color encoding   see above for color coding
+               wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==1){
-                cout << "\033[31m■\033[0m";
+                //cout << "\033[31m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==2){
-                cout << "\033[34m■\033[0m";
+                //cout << "\033[34m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==3){
-                cout << "\033[32m■\033[0m";
+                //cout << "\033[32m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==4){
-                cout << "\033[33m■\033[0m";
+                //cout << "\033[33m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==5){
-                cout << "\033[36m■\033[0m";
+                //cout << "\033[36m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==6){
-                cout << "\033[37m■\033[0m";
+                //cout << "\033[37m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==7){
-                cout << "\033[1;31m■\033[0m";
+                //cout << "\033[1;31m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==8){
-                cout << "\033[1;35m■\033[0m";
+                //cout << "\033[1;35m■\033[0m";
+                wprintw(win, "%s", "■");
             }
             else if(framebuffer[x][y]==9){
-               cout << "\033[35m■\033[0m"; 
+               //cout << "\033[35m■\033[0m";
+               wprintw(win, "%s", "■");
             }
             //cout << framebuffer[x][y];
-        }cout << endl<<"\r";
+        }/*cout << endl<<"\r";*/ wprintw(win, "%s", "\n");
     }
     
-    
-    //while loop that acts as game loop/framerate etc. until I find better solution
-        //double for loop runs through screen resolution pixel by pixel and calls ray_caster()
-        //render results on cmd with "\u25A0" black geometric square character
-        //check for user input to break out of loop and end program cleanly
+        
     auto stop = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = stop - start;
-    cout << "time: " << elapsed.count() <<endl<<"\r";
+    //cout << "time: " << elapsed.count() <<endl<<"\r";
+    wprintw(win, "%s", "time: "); wprintw(win, "%f", elapsed.count()); wprintw(win, "%s", "\n");
+    wrefresh(win);
+    wmove(win,0,0);
     
 
-        usleep(100000); //pauses loop so output can be seen on screen   TODO:refine to cause less flickering
-        wclear(win); //clear screen for next loop
+        usleep(500000); //pauses loop so output can be seen on screen   TODO:refine to cause less flickering    something to do with erase vs clear maybe
     }
     endwin();
     
@@ -170,12 +200,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
 
 
 
-//not needed?
-//this function is what sends out rays, takes 2 angles as inputs and returns hex rgb values(#FFFFFF)
-//int ray_caster(){
-    //return 0x000000;
-//}//optional ray splitting for distant objects average rgb values of the 2 sub rays
-
+//optional TODO:ray splitting for distant objects average rgb values of the 2 sub rays
 
 /*worry about this later. easier to just generate map in c++ for now
 //read map file into var
