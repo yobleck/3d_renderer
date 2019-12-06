@@ -13,7 +13,7 @@ using namespace std;
 
 int main(){//auto start = chrono::high_resolution_clock::now();
     //declare and initialize variables
-    setlocale(LC_ALL,""); //for proper wprintw of square character
+    setlocale(LC_ALL,""); //for proper wprintw of square unicode character
     int player_pos[3] = {50, 50, 50}; //={500,500,500} //store player position in 3d space
     const double pi = 3.14159265358979323846; //defines pi duh
     double cam_angle[2] = {pi/2, 0}; //={0,0} //store the vertical and horizontal camera angle
@@ -65,29 +65,42 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     
     
     int input;
-    int temp_loop =0;
-    initscr(); //start curses
+    int temp_loop=0;
+    initscr(); //start ncurses
     noecho();
-    //curs_set(0) //makes cursor invisible
-    refresh();
-    WINDOW *win = newwin(0,0,0,0); //creates window    TODO:might want to uses this to set to res
+    start_color();//curses color initialization
+        init_pair(0,COLOR_BLACK,COLOR_BLACK);
+        init_pair(1,COLOR_RED,COLOR_BLACK);
+        init_pair(2,COLOR_BLUE,COLOR_BLACK);
+        init_pair(3,COLOR_GREEN,COLOR_BLACK);
+        init_pair(4,COLOR_YELLOW,COLOR_BLACK);
+        init_pair(5,COLOR_CYAN,COLOR_BLACK);
+        init_pair(6,COLOR_WHITE,COLOR_BLACK);
+        init_pair(7,COLOR_RED,COLOR_YELLOW);
+        init_pair(8,COLOR_RED,COLOR_GREEN);
+        init_pair(9,COLOR_MAGENTA,COLOR_BLACK);
+    curs_set(0); //makes cursor invisible
+    refresh();//very necessary. world will end without
+    WINDOW *win = newwin(0,0,0,0); //creates window    TODO:might want to set this to res
     nodelay(win,TRUE); //makes wgetch non blocking
     
-    while(temp_loop<20){ //MAIN LOOP
-        temp_loop++;
-        input = wgetch(win); //w=119 a=97 s=115 d=100 i=105 j=106 k=107 l=108 p=112
+    while(temp_loop<200){ //MAIN LOOP
+        //temp_loop++;
+        input = wgetch(win); //w=119 a=97 s=115 d=100 q=113 e=101 i=105 j=106 k=107 l=108 p=112
         //TODO:insert code to handle user inputs here
-        if(input==112){break;} //check for user input to break out of loop and end program cleanly
-        else if(input==119){player_pos[0]++;}
-        else if(input==97){}
-        else if(input==115){player_pos[0]--;}
-        else if(input==100){}
-        else if(input==105){}
-        else if(input==106){}
-        else if(input==107){}
-        else if(input==108){}
+        //all movement directions are absolute and independent of rotation
+        if(input==112){break;} //break out of loop and end program cleanly
+        else if(input==119){player_pos[0]++;} //forward
+        else if(input==97){player_pos[2]++;}
+        else if(input==115){player_pos[0]--;} //backwards
+        else if(input==100){player_pos[2]--;}
+        else if(input==113){player_pos[1]--;} //up
+        else if(input==101){player_pos[1]++;} //down
+        else if(input==105){cam_angle[1]+=pi/180;}
+        else if(input==106){cam_angle[0]-=pi/180;}
+        else if(input==107){cam_angle[1]-=pi/180;}
+        else if(input==108){cam_angle[0]+=pi/180;}
         
-        player_pos[1]++; //for testing
     
     //actual rendering calculations done here
     auto start = chrono::high_resolution_clock::now();
@@ -127,54 +140,60 @@ int main(){//auto start = chrono::high_resolution_clock::now();
         frame_vert++; frame_hor=0;
     }
     
-        //clear previous frame before drawing new one
-        //wclear(win);
-        //werase(win);
-        //wmove(win,0,0);
-        //wrefresh(win);    //why doesn't this work TODO:draw entire frame to buffer then refresh to draw all at once
+
     
     //print frame buffer to cmd with "\u25A0" black geometric square character
     for(int x=0;x<res[1];x++){
         for(int y=0;y<res[0];y++){
-            if(framebuffer[x][y]==0){
-               //cout << "\033[30m■\033[0m"; //unicode square character as pixel with ascii color encoding   see above for color coding
-               wprintw(win, "%s", "■");
+            if(framebuffer[x][y]==0){//unicode square character as pixel with ascii color encoding   see above for color coding
+                wattron(win,COLOR_PAIR(0));
+                wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(0));
             }
             else if(framebuffer[x][y]==1){
-                //cout << "\033[31m■\033[0m";
+                wattron(win,COLOR_PAIR(1));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(1));
             }
             else if(framebuffer[x][y]==2){
-                //cout << "\033[34m■\033[0m";
+                wattron(win,COLOR_PAIR(2));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(2));
             }
             else if(framebuffer[x][y]==3){
-                //cout << "\033[32m■\033[0m";
+                wattron(win,COLOR_PAIR(3));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(3));
             }
             else if(framebuffer[x][y]==4){
-                //cout << "\033[33m■\033[0m";
+                wattron(win,COLOR_PAIR(4));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(4));
             }
             else if(framebuffer[x][y]==5){
-                //cout << "\033[36m■\033[0m";
+                wattron(win,COLOR_PAIR(5));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(5));
             }
             else if(framebuffer[x][y]==6){
-                //cout << "\033[37m■\033[0m";
+                wattron(win,COLOR_PAIR(6));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(6));
             }
             else if(framebuffer[x][y]==7){
-                //cout << "\033[1;31m■\033[0m";
+                wattron(win,COLOR_PAIR(7));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(7));
             }
             else if(framebuffer[x][y]==8){
-                //cout << "\033[1;35m■\033[0m";
+                wattron(win,COLOR_PAIR(8));
                 wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(8));
             }
             else if(framebuffer[x][y]==9){
-               //cout << "\033[35m■\033[0m";
-               wprintw(win, "%s", "■");
+               wattron(win,COLOR_PAIR(9));
+                wprintw(win, "%s", "■");
+                wattroff(win, COLOR_PAIR(9));
             }
             //cout << framebuffer[x][y];
         }/*cout << endl<<"\r";*/ wprintw(win, "%s", "\n");
@@ -189,7 +208,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     wmove(win,0,0);
     
 
-        usleep(500000); //pauses loop so output can be seen on screen   TODO:refine to cause less flickering    something to do with erase vs clear maybe
+        usleep(1000); //pauses loop so output is slower
     }
     endwin();
     

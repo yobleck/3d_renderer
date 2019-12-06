@@ -22,9 +22,9 @@ int main(){
         input = wgetch(win); //w=119 a=97 s=115 d=100 i=105 j=106 k=107 l=108 p=112
         //std::cout << input <<std::endl<<"\r";
         wprintw(win, "%i", input); wprintw(win, "%s", "\n\r");   //https://alvinalexander.com/programming/printf-format-cheat-sheet
-        attron(COLOR_PAIR(1));
+        wattron(win, COLOR_PAIR(1));
         wprintw(win, "%s", "■\n");
-        attroff(COLOR_PAIR(1));
+        wattroff(win, COLOR_PAIR(1));
         wrefresh(win);
         if(input==112){break;} //https://blogs.longwin.com.tw/lifetype/key_codes.html
     }
