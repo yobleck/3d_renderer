@@ -17,11 +17,11 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     int player_pos[3] = {50, 50, 50}; //={500,500,500} //store player position in 3d space
     const double pi = 3.14159265358979323846; //defines pi duh
     double cam_angle[2] = {pi/2, 0}; //={0,0} //store the vertical and horizontal camera angle
-    const double res[2] = {72, 40}; //={1920,1080} //horizontal then vertical resolution
-    const int render_dist = 65;
+    const double res[2] = {96, 55}; //={1920,1080} //horizontal then vertical resolution    //BUG:perfect 16:9 causes problem
+    const int render_dist = 50;
     const double fov[2] = {pi/2, (5*pi)/12}; //={90,75} //horizontal then vertical field of view
     
-    //TODO:replace this with read from vmf file and k-d tree and stuff
+    //TODO:replace this with read from vmf file and k-d tree or octree and stuff
     int map[100][100][100]; //map data with each x,y,z point holding color info
     //populates cubic map with walls of different colors/numbers
     for(int x=0;x<100;x++){
@@ -58,8 +58,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     for(int x=0;x<res[1];x++){
         for(int y=0;y<res[0];y++){
             framebuffer[x][y]=8; //=bold magenta
-            //cout << framebuffer[x][y];
-        }//cout << endl;
+        }
     }
     //////////////////////////////////////////end of initialization
     
@@ -90,15 +89,15 @@ int main(){//auto start = chrono::high_resolution_clock::now();
         //TODO:insert code to handle user inputs here
         //all movement directions are absolute and independent of rotation
         if(input==112){break;} //break out of loop and end program cleanly
-        else if(input==119){player_pos[0]++;} //forward
-        else if(input==97){player_pos[2]++;}
-        else if(input==115){player_pos[0]--;} //backwards
-        else if(input==100){player_pos[2]--;}
-        else if(input==113){player_pos[1]--;} //up
-        else if(input==101){player_pos[1]++;} //down
-        else if(input==105){cam_angle[1]+=pi/180;}
+        else if(input==119){if(player_pos[0]<98){player_pos[0]++;}} //forward
+        else if(input==97){if(player_pos[2]<98){player_pos[2]++;}}
+        else if(input==115){if(player_pos[0]>0){player_pos[0]--;}} //backwards    //BUG: remove >0 limit to see some wierd shit
+        else if(input==100){if(player_pos[2]>0){player_pos[2]--;}}
+        else if(input==113){if(player_pos[1]>0){player_pos[1]--;}} //up
+        else if(input==101){if(player_pos[1]<98){player_pos[1]++;}} //down
+        else if(input==105){cam_angle[1]-=pi/180;} //look up  ///BUG: cant look all the way up or down
         else if(input==106){cam_angle[0]-=pi/180;}
-        else if(input==107){cam_angle[1]-=pi/180;}
+        else if(input==107){cam_angle[1]+=pi/180;} //look down
         else if(input==108){cam_angle[0]+=pi/180;}
         
     
@@ -134,7 +133,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
                         framebuffer[frame_hor][frame_vert] = 9;
                     }
                }
-            }//cout << endl;
+            }
             frame_hor++;
         }
         frame_vert++; frame_hor=0;
@@ -145,7 +144,14 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     //print frame buffer to cmd with "\u25A0" black geometric square character
     for(int x=0;x<res[1];x++){
         for(int y=0;y<res[0];y++){
-            if(framebuffer[x][y]==0){//unicode square character as pixel with ascii color encoding   see above for color coding
+            
+            ///* //unicode square character as pixel with ascii color encoding   see above for color coding
+            wattron(win,COLOR_PAIR(framebuffer[x][y]));  //BUG: colors are inverted?
+            wprintw(win, "%s", "■");
+            wattroff(win, COLOR_PAIR(framebuffer[x][y]));
+             //*/
+            /*
+            if(framebuffer[x][y]==0){
                 wattron(win,COLOR_PAIR(0));
                 wprintw(win, "%s", "■");
                 wattroff(win, COLOR_PAIR(0));
@@ -194,26 +200,22 @@ int main(){//auto start = chrono::high_resolution_clock::now();
                wattron(win,COLOR_PAIR(9));
                 wprintw(win, "%s", "■");
                 wattroff(win, COLOR_PAIR(9));
-            }
-            //cout << framebuffer[x][y];
-        }/*cout << endl<<"\r";*/ wprintw(win, "%s", "\n");
+            }*/
+        }wprintw(win, "%s", "\n");
     }
     
         
     auto stop = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = stop - start;
-    //cout << "time: " << elapsed.count() <<endl<<"\r";
     wprintw(win, "%s", "time: "); wprintw(win, "%f", elapsed.count()); wprintw(win, "%s", "\n");
     wrefresh(win);
     wmove(win,0,0);
     
 
-        usleep(1000); //pauses loop so output is slower
+        //usleep(1000); //pauses loop so output is slower
     }
     endwin();
     
-    
-    //cout << "\ntest" << endl;
     return 0;
 }
 
