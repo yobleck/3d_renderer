@@ -1,4 +1,4 @@
-//g++ -lncurses -o 3dexe 3d.cpp     -lncurses see usr_input.cpp
+//g++ -lncurses -lpthread -pthread -o 3dexe 3d.cpp     -lncurses see usr_input.cpp
 #include <iostream>
 //#include <fstream> //file reading
 #include <cstdlib>
@@ -9,7 +9,11 @@
 #include <ncurses.h> //for screen rendering stuff
 #include <unistd.h> //for sleeping
 #include <locale.h> //for proper printw of suare character
+#include <pthread.h>
+#include <thread>
 using namespace std;
+
+//TODO: Multithreading    allow off screen pixels to test higher resolutions
 
 int main(){//auto start = chrono::high_resolution_clock::now();
     //declare and initialize variables
@@ -149,58 +153,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
             wattron(win,COLOR_PAIR(framebuffer[x][y]));  //BUG: colors are inverted?
             wprintw(win, "%s", "■");
             wattroff(win, COLOR_PAIR(framebuffer[x][y]));
-             //*/
-            /*
-            if(framebuffer[x][y]==0){
-                wattron(win,COLOR_PAIR(0));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(0));
-            }
-            else if(framebuffer[x][y]==1){
-                wattron(win,COLOR_PAIR(1));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(1));
-            }
-            else if(framebuffer[x][y]==2){
-                wattron(win,COLOR_PAIR(2));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(2));
-            }
-            else if(framebuffer[x][y]==3){
-                wattron(win,COLOR_PAIR(3));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(3));
-            }
-            else if(framebuffer[x][y]==4){
-                wattron(win,COLOR_PAIR(4));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(4));
-            }
-            else if(framebuffer[x][y]==5){
-                wattron(win,COLOR_PAIR(5));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(5));
-            }
-            else if(framebuffer[x][y]==6){
-                wattron(win,COLOR_PAIR(6));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(6));
-            }
-            else if(framebuffer[x][y]==7){
-                wattron(win,COLOR_PAIR(7));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(7));
-            }
-            else if(framebuffer[x][y]==8){
-                wattron(win,COLOR_PAIR(8));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(8));
-            }
-            else if(framebuffer[x][y]==9){
-               wattron(win,COLOR_PAIR(9));
-                wprintw(win, "%s", "■");
-                wattroff(win, COLOR_PAIR(9));
-            }*/
+            
         }wprintw(win, "%s", "\n");
     }
     
@@ -218,6 +171,7 @@ int main(){//auto start = chrono::high_resolution_clock::now();
     
     return 0;
 }
+
 
 
 
